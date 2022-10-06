@@ -8,10 +8,6 @@ def handle_events():
     global y #일단 추가
     global xdir
     global ydir
-    global stop_RIGHT
-    global stop_LEFT
-    global stop_UP
-    global stop_DOWN
 
     events = get_events() #1. 입력 이벤트 폴링
     for event in events:
@@ -84,9 +80,11 @@ while running:
     elif xdir == -1 and ydir == 0: #왼쪽으로
         character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
 
+
     #위아래 움직임
     elif xdir == 0 and ydir == 1: #위로
         character.clip_draw(frame * 100, 100 * 1, 100, 100, x, y)
+
     elif xdir == 0 and ydir == -1: #아래로
         character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
 
@@ -102,29 +100,8 @@ while running:
     elif xdir == -1 and ydir == 1: #왼쪽으로 움직임, 위로 올라감(왼쪽 위 대각선)
         character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
 
-    elif xdir == -1 and ydir == -1:  #왼쪽으로 움직임, 아래로 내려감(왼쪽 아래 대각선)
+    elif xdir == -1 and ydir == -1: #왼쪽으로 움직임, 아래로 내려감(왼쪽 아래 대각선)
         character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
-
-
-
-
-    # 여기서 빈 공간 이미지 하나 더 만들어서, 빈 이미지 출력하면, 그럴싸 해보이지 않을까?
-
-
-    if xdir == -1:
-        character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
-                                                       #x, y) 로 수정하면 대각선으로 움직임.
-                                                       #90, x)로 수정하면 좌, 우 키눌렀는데 위, 아래로 움직임.
-    elif xdir == 1:
-        character.clip_draw(frame * 100, 100 * 1, 100, 100, x, y)
-
-
-    if ydir == 1 and xdir == 1:
-        character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
-
-    elif ydir == -1 and xdir == -1:
-        character.clip_draw(frame * 100, 100 * 1, 100, 100, x, y)
-
 
 
     update_canvas()
