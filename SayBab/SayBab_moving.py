@@ -1,13 +1,9 @@
 from pico2d import *
 
 def handle_events():
-    # fill here
     # 좌우 움직이기!!!!
     global running
-    global x #바깥쪽에 정의된 X이다!
-    global y #일단 추가
-    global xdir
-    global ydir
+    global x, y, xdir, ydir #바깥쪽에 정의된 X이다!
 
     events = get_events() #1. 입력 이벤트 폴링
     for event in events:
@@ -28,7 +24,6 @@ def handle_events():
             elif event.key == SDLK_DOWN:
                 ydir -= 1
 
-            
             elif event.key == SDLK_ESCAPE:
                 running = False
 
@@ -38,20 +33,14 @@ def handle_events():
             if event.key == SDLK_RIGHT:
                 xdir -= 1
 
-
             elif event.key == SDLK_LEFT:
                 xdir += 1
-
 
             elif event.key == SDLK_UP:
                 ydir -= 1
 
-
             elif event.key == SDLK_DOWN:
                 ydir += 1
-
-
-
 
 
 open_canvas()
@@ -59,11 +48,10 @@ grass = load_image('SayBab_Test_BackGround.png')
 character = load_image('SayBar.png')
 
 running = True
-x = 800 // 2 #이게 뭔 값이였지# #800 // 2 전체 캔버스800에서 절반을 사용하겠다 는 의미
+x = 800 // 2 #800 // 2 전체 캔버스800에서 절반을 사용하겠다 는 의미
 xdir = 0
 ydir = 0
-y = 600 // 2 #얘는 내가 왜 넣었지.
-
+y = 600 // 2
 frame = 0
 
 while running:
@@ -102,7 +90,6 @@ while running:
 
     elif xdir == -1 and ydir == -1: #왼쪽으로 움직임, 아래로 내려감(왼쪽 아래 대각선)
         character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
-
 
     update_canvas()
 
