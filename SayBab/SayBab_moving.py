@@ -54,7 +54,8 @@ def handle_events():
 
             elif event.key == SDLK_d:
                 attack_1 -= 1
-                t = 4
+                t = 3
+
 
 
 
@@ -72,11 +73,6 @@ attack_1 = 0
 frame = 0
 t = 3
 
-#while attack:
-    #공격 모션은 while을 하나 더 만들어야 하나?
-    # 그러면 프레임이 8개짜리로 고정해야 할 텐데?
-
-
 while running:
     clear_canvas()
     grass.draw(430, 305)
@@ -85,9 +81,10 @@ while running:
 
     #if xdir == 0 and ydir == 0: #대기
         #character.clip_draw(frame * 100, 100 * 3, 100, 100, x, y)
-    if attack_1 == 1 :  # 공격
 
+    if attack_1 == 1 :  # 공격
         character.clip_draw(frame * 100, 500 * 1, 100, 100, x, y)
+
 
     if xdir != 0 and ydir != 0:
         character.clip_draw(frame * 100, 100 * 4, 100, 100, x, y)
@@ -122,9 +119,6 @@ while running:
     elif xdir == -1 and ydir == -1: #왼쪽으로 움직임, 아래로 내려감(왼쪽 아래 대각선)
         character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
         
-
-
-
 
     update_canvas()
 
