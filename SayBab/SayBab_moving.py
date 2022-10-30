@@ -3,7 +3,7 @@ from pico2d import *
 def handle_events():
     # 좌우 움직이기!!!!
     global running
-    global x, y, xdir, ydir #바깥쪽에 정의된 X이다!
+    global x, y, xdir, ydir #바깥쪽에 정의된 X
     global t
     global attack_1
 
@@ -13,7 +13,6 @@ def handle_events():
             running = False
         elif event.type == SDL_KEYDOWN:
 
-            # 아래 Tab키로 띄어쓰기 중요함
             if event.key == SDLK_RIGHT:  # 오른쪽 #3. 이벤트 실제 입력값 구하기
                 xdir += 1  # 증가
                 t = 1
@@ -78,7 +77,6 @@ while running:
     grass.draw(430, 305)
 
     character.clip_draw(frame * 100, 100 * t, 100, 100, x, y)
-
     #if xdir == 0 and ydir == 0: #대기
         #character.clip_draw(frame * 100, 100 * 3, 100, 100, x, y)
 
