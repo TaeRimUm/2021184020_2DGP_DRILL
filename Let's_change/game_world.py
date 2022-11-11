@@ -1,6 +1,6 @@
 # layer 0: 백스라운드 옵젝
 # layer 1: 포그라운드 옵젝
-objects = [[], [], []]
+objects = [[], [], [], []]
 
 def add_object(o, depth):
     objects[depth].append(o)
