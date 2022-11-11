@@ -11,7 +11,7 @@ def add_objects(ol, depth):
 def remove_object(o):
     for layer in objects:
         if o in layer:
-            layer.remove(o) # 리스트로부터 삭제
+            #layer.remove(o) ##리스트로부터 삭제 ##얘는 전사라 공 날릴줄 몰라!!##
     #공이 화면 밖으로 나가면 없어짐. 하지만 메모리에서 날리지는 않음.
     #월드에서 지운거지, 메모리에서 지운건 아니기 때문.
             del o # 실제로 메모리 삭제
