@@ -10,7 +10,7 @@ from boy import Boy
 boy = None
 grass = None
 grass1 = None
-ball = None
+# ball = None ##얘는 전사라 볼 발사할줄 몰라!!##
 
 def handle_events():
     events = get_events()
