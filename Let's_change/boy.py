@@ -3,6 +3,7 @@ import game_world
 
 import play_state #ball 객체확보
 from ball import Ball #볼 클래스인 Ball를 확보.
+from attack_d import Attack_d
 
 
 #1 : 이벤트 정의
@@ -24,17 +25,20 @@ key_event_table = {
 class IDLE:
     @staticmethod
     def enter(self, event):
-        print('ENTER IDLE')
+        print('IDLE 엔터')
         self.dir = 0
         self.attack_dir = 0
         self.timer = 1000
 
     @staticmethod
     def exit(self, event): #IDLE이 끝날 때 마다 파이어볼하면 문제가 생김.
-        print('EXIT IDLE')
+        print('IDLE 나가기')
 
         if event == SPACE: #그래서 스페이스가 눌린 exit일 때 파이어볼을 함.
             self.fire_ball()
+        # elif event == DD:
+        #     print('DD키를 입력함.')
+        #     self.attack_d()
 
     @staticmethod
     def do(self):
@@ -42,6 +46,8 @@ class IDLE:
         self.timer -= 1
         if self.timer == 0:
             self.add_event(TIMER)
+
+
 
 
     @staticmethod
@@ -53,9 +59,8 @@ class IDLE:
 
 
 class RUN:
-
     def enter(self, event):
-        print('ENTER RUN')
+        print('RUN 입력')
         if event == RD:
             self.dir += 1
         elif event == LD:
@@ -65,16 +70,18 @@ class RUN:
         elif event == LU:
             self.dir += 1
 
+
     def exit(self, event): #RUN이 끝날 때 마다 파이어볼하면 문제가 생김.
-        print('EXIT RUN')
+        print('RUN 나가기')
         self.face_dir = self.dir
 
         if event == SPACE: #그래서 RUN일 상태에서 스페이스를 눌러서, exit일 때 파이어볼을 함.
-            self.fire_ball()
+            self.fire_ball() #달려가면서 공발사할 수 있도록.
+
 
     def do(self):
         self.frame = (self.frame + 1) % 8
-        self.x += self.dir #, self.attack_dir
+        self.x += self.dir
         self.x = clamp(0, self.x, 800)
 
     def draw(self):
@@ -84,39 +91,31 @@ class RUN:
             self.image.clip_draw(self.frame*100, 100, 100, 100, self.x, self.y)
 
 
-#D키를 누르면 EXIT IDLE, ENTER IDLE 눌렀다 때도 EXIT IDLE, ENTER IDLE 가 출력 됨.
-
-#        if event == SPACE: #그래서 스페이스가 눌린 exit일 때 파이어볼을 함.
-#            self.fire_ball()
-#       이거 처럼 if event == DD: 를 사용해서 attack_d.py를 만들어야 하나?
-#       아니면 def attack_d를 사용해야 하나?
-#       공격 모션은 하나의 상태로 만들어야 하기 때문에 Class를 써야 하는데 싯팔 진짜
-
-class Attack_d:
-
+class attack_d:
     def enter(self, event):
-        print('attack_d')
         if event == DD:
+            print('attack_d 입력')
             self.attack_dir += 1
         elif event == DU:
             self.attack_dir -= 1
 
-    def exit(self, event): #RUN이 끝날 때 마다 attack_d하면 문제가 생김.
-        print('attack_d_exit')
-        self.face_dir = self.attack_dir
+    def exit(self, event): #attack_d이 끝날 때 마다 때리면 문제가 생김.
+        print('그만 때리기')
+        self.face_dir == self.attack_dir
 
     def do(self):
         self.frame = (self.frame + 1) % 8
-        self.x += self.attack_dir
-        self.x = clamp(0, self.x, 800)
+        #self.face_dir == self.attack_dir
+        #self.x = clamp(0, self.x, 800)
 
     def draw(self):
-        if self.attack_dir == 1:
-            self.attack_d.clip_draw(self.frame * 100, 0, 200, 100, self.x, self.y)
+        if self.attack_dir == 1 and self.face_dir == 1:
+            self.attack_d.clip_draw(self.frame * 200, 100, 200, 100, self.x, self.y)
+        elif self.attack_dir == 1 and self.face_dir == -1:
+            self.attack_d.clip_draw(self.frame * 200, 0, 200, 100, self.x, self.y)
 
         elif self.attack_dir == -1:
-            pass
-
+            self.image.clip_draw(self.frame*100, self.face_dir, 100, 100, 100, self.x, self.y)
 
 
 class SLEEP:
@@ -143,9 +142,10 @@ class SLEEP:
 #3. 상태 변환 구현
 
 next_state = {
-    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, TIMER: SLEEP, SPACE: IDLE, DD: IDLE, DU: IDLE},
+    IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, TIMER: SLEEP, SPACE: IDLE, DD: attack_d, DU: attack_d},
     RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE, SPACE: RUN},
-    SLEEP: {RU: RUN, LU: RUN, RD: RUN, LD: RUN, SPACE: IDLE}
+    SLEEP: {RU: RUN, LU: RUN, RD: RUN, LD: RUN, SPACE: IDLE},
+    attack_d: {DD: IDLE, DU:IDLE}
 }
 
 
@@ -159,7 +159,6 @@ class Boy:
         self.dir, self.face_dir = 0, 1
         self.image = load_image('SayBar_1.png')
 
-        self.attack_d = 0
         self.attack_d = load_image('attack_d.png')
 
         self.timer = 100
@@ -203,4 +202,11 @@ class Boy:
         #생성
         ball = Ball(self.x, self.y, self.face_dir*3) #self.face_dir = 바라보는 뱡항
         game_world.add_object(ball, 1)
+
+    # def attack_d(self):
+    #     attack_d = Attack_d(self.x, self.y, self.face_dir*3)
+    #     attack_d.do()
+    #     attack_d.draw()
+
+
 
