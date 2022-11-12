@@ -1,6 +1,7 @@
 from pico2d import *
 import game_framework
 import game_world
+import gamestop
 
 from grass import Grass
 from boy import Boy, attack_d
@@ -20,6 +21,9 @@ def handle_events():
             game_framework.quit()
         else:
             boy.handle_event(event)
+
+        if event.key == SDLK_q:
+            game_framework.push_state(gamestop)
 
 
 # 초기화
