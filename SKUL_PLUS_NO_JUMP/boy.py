@@ -1,10 +1,11 @@
 from pico2d import *
+
 import game_world
 from ball import Ball
 
 #1 : 이벤트 정의
-RD, LD, RU, LU, TIMER, SPACE, DD, DU = range(8)
-event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'SPACE', 'DD', 'DU']
+RD, LD, RU, LU, TIMER, SPACE, DD, DU, XD, XU= range(10)
+event_name = ['RD', 'LD', 'RU', 'LU', 'TIMER', 'SPACE', 'DD', 'DU', 'XD', 'XU']
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RD,
@@ -13,6 +14,8 @@ key_event_table = {
     (SDL_KEYUP, SDLK_LEFT): LU,
     (SDL_KEYDOWN, SDLK_d): DD,
     (SDL_KEYUP, SDLK_d): DU,
+    (SDL_KEYDOWN, SDLK_x): XD,
+    (SDL_KEYUP, SDLK_x): XU
 }
 
 
@@ -23,6 +26,9 @@ class IDLE:
         print('ENTER IDLE')
         self.dir = 0
         self.attack_dir = 0
+
+        self.sample = 0
+
         self.timer = 1000
 
     @staticmethod
@@ -76,25 +82,6 @@ class RUN:
 
 
 class attack_d:
-
-    def update(self):
-        self.cur_state.do(self)
-
-        if self.event_que:
-            event = self.event_que.pop()
-            self.cur_state.exit(self, event)
-            try: #예외처리
-                self.cur_state = next_state[self.cur_state][event]
-                # SLEEP에서 S키를 눌렀을 때 정의가 없어서 오류가 발생함.
-
-            except KeyError: #이 줄을 실행하려 했는데, 문제가 발생했고 그 문제가 KeyError였다면
-                # 아래 코드 실행 후 정상적으로 실행된다. 최소한 죽지는 않음.
-
-                # 어떤 상태에서? 어떤 이벤트 때문에 문제가 발생했는지??
-                print(f'ERROR: State {self.cur_state.__name__}    Event {event_name[event]}')
-            self.cur_state.enter(self, event)
-
-
     def enter(self, event):
         if event == DD:
             print('존나 때리기')
@@ -125,17 +112,22 @@ class attack_d:
 
     def handle_collision(self, other, group):
         pass #충돌 되어도, 아무 반응없기.
+    def update(self):
+        self.cur_state.do(self)
 
+        if self.event_que:
+            event = self.event_que.pop()
+            self.cur_state.exit(self, event)
+            try: #예외처리
+                self.cur_state = next_state[self.cur_state][event]
+                # SLEEP에서 S키를 눌렀을 때 정의가 없어서 오류가 발생함.
 
-    # def get_bb(self): #박스의 왼쪽 좌표, 오른쪽 좌표 알려주기(4개의 값을 넘겨주기)
-    #     if self.attack_dir == 1 and self.face_dir == 1:
-    #         return self.x - 15, self.y - 30, self.x + 100, self.y + 30
-    #     elif self.attack_dir == 1 and self.face_dir == -1:
-    #         return self.x - 100, self.y - 30, self.x + 100, d.y + 30
+            except KeyError: #이 줄을 실행하려 했는데, 문제가 발생했고 그 문제가 KeyError였다면
+                # 아래 코드 실행 후 정상적으로 실행된다. 최소한 죽지는 않음.
 
-
-
-
+                # 어떤 상태에서? 어떤 이벤트 때문에 문제가 발생했는지??
+                print(f'ERROR: State {self.cur_state.__name__}    Event {event_name[event]}')
+            self.cur_state.enter(self, event)
 
 class SLEEP:
 
@@ -152,10 +144,58 @@ class SLEEP:
     def draw(self):
         if self.face_dir == -1:
             self.image.clip_composite_draw(self.frame * 100, 200, 100, 100,
-                                          -3.141592 / 2, '', self.x + 25, self.y - 25, 100, 100)
+                                            -3.141592 / 2, '', self.x + 25, self.y - 25, 100, 100)
         else:
             self.image.clip_composite_draw(self.frame * 100, 300, 100, 100,
-                                          3.141592 / 2, '', self.x - 25, self.y - 25, 100, 100)
+                                            3.141592 / 2, '', self.x - 25, self.y - 25, 100, 100)
+
+
+
+
+    # def get_bb(self): #박스의 왼쪽 좌표, 오른쪽 좌표 알려주기(4개의 값을 넘겨주기)
+    #     if self.attack_dir == 1 and self.face_dir == 1:
+    #         return self.x - 15, self.y - 30, self.x + 100, self.y + 30
+    #     elif self.attack_dir == 1 and self.face_dir == -1:
+    #         return self.x - 100, self.y - 30, self.x + 100, d.y + 30
+
+class gamestop: #일단 일시정지로 바꿈#
+
+    def enter(self, event):
+        #play_state에서 SDLK_x로 이미 입력 받음
+        # if event == XD:
+        #     self.saybab_x += 1
+        # elif event == XU:
+        #     self.saybab_x -= 1
+        pass
+
+    def exit(self):
+        pass
+
+    def do(self):
+        pass
+
+    def draw(self):
+        pass
+    def update(self):
+        self.cur_state.do(self)
+
+        if self.event_que:
+            event = self.event_que.pop()
+            self.cur_state.exit(self, event)
+            try: #예외처리
+                self.cur_state = next_state[self.cur_state][event]
+                # SLEEP에서 S키를 눌렀을 때 정의가 없어서 오류가 발생함.
+
+            except KeyError: #이 줄을 실행하려 했는데, 문제가 발생했고 그 문제가 KeyError였다면
+                # 아래 코드 실행 후 정상적으로 실행된다. 최소한 죽지는 않음.
+
+                # 어떤 상태에서? 어떤 이벤트 때문에 문제가 발생했는지??
+                print(f'ERROR: State {self.cur_state.__name__}    Event {event_name[event]}')
+            self.cur_state.enter(self, event)
+
+
+
+
 
 
 #3. 상태 변환 구현
@@ -164,7 +204,8 @@ next_state = {
     IDLE:  {RU: RUN,  LU: RUN,  RD: RUN,  LD: RUN, TIMER: SLEEP, DD: attack_d, DU: attack_d},
     RUN:   {RU: IDLE, LU: IDLE, RD: IDLE, LD: IDLE},
     SLEEP: {RU: RUN, LU: RUN, RD: RUN, LD: RUN},
-    attack_d: {DD: IDLE, DU: IDLE},
+    attack_d: {DD: IDLE, DU: IDLE}
+    # Saybab_X: {XD: IDLE, XD: RUN, XU: IDLE, XU: RUN}
 }
 
 
@@ -178,12 +219,17 @@ class Boy:
         self.dir, self.face_dir = 0, 1
         self.image = load_image('SayBar_1.png')
         self.attack_d = load_image('attack_d.png')
+        self.gamestop = load_image('gamestop.png')
 
         self.timer = 100
 
         self.event_que = []
         self.cur_state = IDLE
         self.cur_state.enter(self, None)
+
+        #ball.py에 있는거 때와도 제대로 돌아감.#
+        if Ball.image == None:
+            Ball.image = load_image('Enemy_Skul_1.png')
 
     def update(self):
         self.cur_state.do(self)
