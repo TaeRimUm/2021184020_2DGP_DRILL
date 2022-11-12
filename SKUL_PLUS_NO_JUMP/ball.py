@@ -13,10 +13,11 @@ class Ball:
         self.frame = (self.frame + 1) % 8
         self.x = clamp(0, self.x, 1600)
 
-    def __init__(self): ##이건 메서드(초기화)인데, 이걸 어떻게 반복하지???##
-        print('메소드 실행')
-        if Ball.image == None:
-            Ball.image = load_image('Enemy_Skul_1.png')
+    def __init__(self): ##이건 메소드(초기화)인데, 이걸 어떻게 반복하지???##
+        print('Ball에 있는 메소드 실행')
+        # if Ball.image == None:
+        #     Ball.image = load_image('Enemy_Skul_1.png')
+        ## 어 이거 Boy클레스에  만들어도 제대로 돌아가네? 같은 __init__라 그른가!
 
         self.x, self.y, self.fall_speed = random.randint(0, 1600), 80, 0
 
