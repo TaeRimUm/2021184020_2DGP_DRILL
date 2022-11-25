@@ -19,17 +19,20 @@ FRAMES_PER_ACTION = 8
 
 
 # Boy Event
-RIGHTKEY_DOWN, LEFTKEY_DOWN, UPKEY_DOWN, DOWNKEY_DOWN, RIGHTKEY_UP, LEFTKEY_UP, UPKEY_UP, DOWNKEY_UP = range(8)
+RD, LD, RU, LU, DD, DU, UPKEY_DOWN, DOWNKEY_DOWN, UPKEY_UP, DOWNKEY_UP = range(10)
 
 key_event_table = {
-    (SDL_KEYDOWN, SDLK_RIGHT): RIGHTKEY_DOWN,
-    (SDL_KEYDOWN, SDLK_LEFT): LEFTKEY_DOWN,
+    (SDL_KEYDOWN, SDLK_RIGHT): RD,
+    (SDL_KEYDOWN, SDLK_LEFT): LD,
+    (SDL_KEYUP, SDLK_RIGHT): RU,
+    (SDL_KEYUP, SDLK_LEFT): LU,
+    (SDL_KEYDOWN, SDLK_d): DD,
+    (SDL_KEYUP, SDLK_d): DU,
+
+    (SDL_KEYUP, SDLK_UP): UPKEY_UP,
+    (SDL_KEYUP, SDLK_DOWN): DOWNKEY_UP,
     (SDL_KEYDOWN, SDLK_UP): UPKEY_DOWN,
     (SDL_KEYDOWN, SDLK_DOWN): DOWNKEY_DOWN,
-    (SDL_KEYUP, SDLK_RIGHT): RIGHTKEY_UP,
-    (SDL_KEYUP, SDLK_LEFT): LEFTKEY_UP,
-    (SDL_KEYUP, SDLK_UP): UPKEY_UP,
-    (SDL_KEYUP, SDLK_DOWN): DOWNKEY_UP
 }
 
 
@@ -37,68 +40,129 @@ key_event_table = {
 
 class WalkingState:
 
-    def enter(boy, event):
-        if event == RIGHTKEY_DOWN:
-            boy.x_velocity += RUN_SPEED_PPS
-        elif event == RIGHTKEY_UP:
-            boy.x_velocity -= RUN_SPEED_PPS
-        if event == LEFTKEY_DOWN:
-            boy.x_velocity -= RUN_SPEED_PPS
-        elif event == LEFTKEY_UP:
-            boy.x_velocity += RUN_SPEED_PPS
+    def enter(self, event):
+
+        self.attack_dir = 0
+
+        if event == RD:
+            self.x_velocity += RUN_SPEED_PPS
+        elif event == RU:
+            self.x_velocity -= RUN_SPEED_PPS
+        if event == LD:
+            self.x_velocity -= RUN_SPEED_PPS
+        elif event == LU:
+            self.x_velocity += RUN_SPEED_PPS
 
         if event == UPKEY_DOWN:
-            boy.y_velocity += RUN_SPEED_PPS
+            self.y_velocity += RUN_SPEED_PPS
         elif event == UPKEY_UP:
-            boy.y_velocity -= RUN_SPEED_PPS
+            self.y_velocity -= RUN_SPEED_PPS
         if event == DOWNKEY_DOWN:
-            boy.y_velocity -= RUN_SPEED_PPS
+            self.y_velocity -= RUN_SPEED_PPS
         elif event == DOWNKEY_UP:
-            boy.y_velocity += RUN_SPEED_PPS
+            self.y_velocity += RUN_SPEED_PPS
 
 
 
-    def exit(boy, event):
+    def exit(self, event):
         pass
 
-    def do(boy):
-        boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-        boy.x += boy.x_velocity * game_framework.frame_time
-        boy.y += boy.y_velocity * game_framework.frame_time
+    def do(self):
+        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+        self.x += self.x_velocity * game_framework.frame_time
+        self.y += self.y_velocity * game_framework.frame_time
 
-        boy.x = clamp(0, boy.x, server.background.w - 1)
-        boy.y = clamp(0, boy.y, server.background.h - 1)
+        self.x = clamp(0, self.x, server.background.w - 1)
+        self.y = clamp(0, self.y, server.background.h - 1)
 
 
-    def draw(boy):
-        sx, sy = boy.x - server.background.window_left, boy.y - server.background.window_bottom
+    def draw(self):
+        sx, sy = self.x - server.background.window_left, self.y - server.background.window_bottom
 
-        boy.font.draw(sx - 40, sy + 40, '(%d, %d)' % (boy.x, boy.y), (255, 255, 0))
+        self.font.draw(sx - 40, sy + 40, '(%d, %d)' % (self.x, self.y), (255, 255, 0))
 
-        if boy.x_velocity > 0:
-            boy.image.clip_draw(int(boy.frame) * 100, 100, 100, 100, sx, sy)
-            boy.dir = 1
-        elif boy.x_velocity < 0:
-            boy.image.clip_draw(int(boy.frame) * 100, 0, 100, 100, sx, sy)
-            boy.dir = -1
+        if self.x_velocity > 0:                         #오른쪽으로 뛰기
+            self.image.clip_draw(int(self.frame) * 100, 100, 100, 100, sx, sy)
+            self.dir = 1
+        elif self.x_velocity < 0:                       #왼쪽으로 뛰기
+            self.image.clip_draw(int(self.frame) * 100, 0, 100, 100, sx, sy)
+            self.dir = -1
         else:
             # if boy x_velocity == 0
-            if boy.y_velocity > 0 or boy.y_velocity < 0:
-                if boy.dir == 1:
-                    boy.image.clip_draw(int(boy.frame) * 100, 100, 100, 100, sx, sy)
+            if self.y_velocity > 0 or self.y_velocity < 0:
+                if self.dir == 1:
+                    self.image.clip_draw(int(self.frame) * 100, 100, 100, 100, sx, sy)
                 else:
-                    boy.image.clip_draw(int(boy.frame) * 100, 0, 100, 100, sx, sy)
+                    self.image.clip_draw(int(self.frame) * 100, 0, 100, 100, sx, sy)
             else:
                 # boy is idle
-                if boy.dir == 1:
-                    boy.image.clip_draw(int(boy.frame) * 100, 300, 100, 100, sx, sy)
-                else:
-                    boy.image.clip_draw(int(boy.frame) * 100, 200, 100, 100, sx, sy)
+                if self.dir == 1:                               #오른쪽보고 대기
+                    self.image.clip_draw(int(self.frame) * 100, 300, 100, 100, sx, sy)
+                else:                                           #왼쪽보고 대기
+                    self.image.clip_draw(int(self.frame) * 100, 200, 100, 100, sx, sy)
+
+
+class ATTACK:
+    def enter(self, event):
+        if event == DD:
+            print('존나 때리기')
+            self.attack_dir += 1
+        elif event == DU:
+            self.attack_dir -= 1
+    def exit(self, event): #ATTACK이 끝날 때 마다 때리면 문제가 생김.
+        print('그만 때리기')
+
+    def do(self):
+        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
+    def draw(self):
+        sx, sy = self.x - server.background.window_left, self.y - server.background.window_bottom
+
+        if self.attack_dir == 1 and self.dir == 1:
+            self.ATTACK.clip_draw(self.frame * 200, 100, 200, 100, sx, sy)
+
+        elif self.attack_dir == 1 and self.dir == -1:
+            self.ATTACK.clip_draw(self.frame * 200, 0, 200, 100, sx, sy)
+
+
+
+        # if self.attack_dir == 1 and self.face_dir == 1:
+        #     self.ATTACK.clip_draw(self.frame * 200, 100, 200, 100, self.x, self.y)
+        #
+        # elif self.attack_dir == 1 and self.face_dir == -1:
+        #     self.ATTACK.clip_draw(self.frame * 200, 0, 200, 100, self.x, self.y)
+
+    def handle_collision(self, other, group):
+        pass #충돌 되어도, 아무 반응없기.
+
+    def update(self):
+        self.cur_state.do(self)
+
+        # if self.event_que:
+        #     event = self.event_que.pop()
+        #     self.cur_state.exit(self, event)
+        #     try: #예외처리
+        #         self.cur_state = next_state_table[self.cur_state][event]
+        #         # SLEEP에서 S키를 눌렀을 때 정의가 없어서 오류가 발생함.
+        #
+        #     except KeyError: #이 줄을 실행하려 했는데, 문제가 발생했고 그 문제가 KeyError였다면
+        #         # 아래 코드 실행 후 정상적으로 실행된다. 최소한 죽지는 않음.
+        #
+        #         # 어떤 상태에서? 어떤 이벤트 때문에 문제가 발생했는지??
+        #         print(f'ERROR: State {self.cur_state.__name__}    Event {event_name[event]}')
+        #     self.cur_state.enter(self, event)
+
+
+
+
+
+
 
 
 next_state_table = {
-    WalkingState: {RIGHTKEY_UP: WalkingState, LEFTKEY_UP: WalkingState, RIGHTKEY_DOWN: WalkingState, LEFTKEY_DOWN: WalkingState,
-                UPKEY_UP: WalkingState, UPKEY_DOWN: WalkingState, DOWNKEY_UP: WalkingState, DOWNKEY_DOWN: WalkingState}
+    WalkingState: {RU: WalkingState, LU: WalkingState, RD: WalkingState, LD: WalkingState,
+                UPKEY_UP: WalkingState, UPKEY_DOWN: WalkingState, DOWNKEY_UP: WalkingState, DOWNKEY_DOWN: WalkingState},
+    ATTACK: {DD: WalkingState, DU: WalkingState},
 }
 
 
@@ -106,8 +170,9 @@ class Boy:
 
     def __init__(self):
         # Boy is only once created, so instance image loading is fine
-        self.image = load_image('animation_sheet.png')
+        self.image = load_image('SayBar_1.png')
         self.font = load_font('ENCR10B.TTF', 16)
+        self.ATTACK = load_image('attack_d.png')
         self.dir = 1
         self.x_velocity, self.y_velocity = 0, 0
         self.frame = 0
