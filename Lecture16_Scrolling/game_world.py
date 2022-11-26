@@ -1,7 +1,7 @@
 
 # layer 0: Background Objects
 # layer 1: Foreground Objects
-objects = [[], []]
+objects = [[], [], []]
 collision_group = dict()
 
 def add_object(o, depth):
