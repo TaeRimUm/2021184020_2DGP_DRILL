@@ -4,22 +4,26 @@ from pico2d import *
 import game_world
 import server
 
-# Boy Run Speed
+# saybar Run Speed
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
 RUN_SPEED_KMPH = 40.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
-# Boy Action Speed
+# saybar Action Speed
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
+
+# saybar Attack
+
 
 
 
 # Boy Event
 RD, LD, RU, LU, DD, DU, UPKEY_DOWN, DOWNKEY_DOWN, UPKEY_UP, DOWNKEY_UP = range(10)
+event_name = {'RD', 'LD', 'RU', 'LU', 'DD', 'DU'}
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RD,
@@ -41,8 +45,6 @@ key_event_table = {
 class WalkingState:
 
     def enter(self, event):
-
-        self.attack_dir = 0
 
         if event == RD:
             self.x_velocity += RUN_SPEED_PPS
@@ -106,9 +108,9 @@ class ATTACK:
     def enter(self, event):
         if event == DD:
             print('존나 때리기')
-            self.attack_dir += 1
+            self.attack_velocity += 1
         elif event == DU:
-            self.attack_dir -= 1
+            self.attack_velocity -= 1
     def exit(self, event): #ATTACK이 끝날 때 마다 때리면 문제가 생김.
         print('그만 때리기')
 
@@ -118,13 +120,11 @@ class ATTACK:
     def draw(self):
         sx, sy = self.x - server.background.window_left, self.y - server.background.window_bottom
 
-        if self.attack_dir == 1 and self.dir == 1:
+        if self.attack_velocity == 1 and self.dir == 1:
             self.ATTACK.clip_draw(self.frame * 200, 100, 200, 100, sx, sy)
 
-        elif self.attack_dir == 1 and self.dir == -1:
+        elif self.attack_velocity == 1 and self.dir == -1:
             self.ATTACK.clip_draw(self.frame * 200, 0, 200, 100, sx, sy)
-
-
 
         # if self.attack_dir == 1 and self.face_dir == 1:
         #     self.ATTACK.clip_draw(self.frame * 200, 100, 200, 100, self.x, self.y)
@@ -132,25 +132,26 @@ class ATTACK:
         # elif self.attack_dir == 1 and self.face_dir == -1:
         #     self.ATTACK.clip_draw(self.frame * 200, 0, 200, 100, self.x, self.y)
 
+
     def handle_collision(self, other, group):
         pass #충돌 되어도, 아무 반응없기.
 
     def update(self):
         self.cur_state.do(self)
 
-        # if self.event_que:
-        #     event = self.event_que.pop()
-        #     self.cur_state.exit(self, event)
-        #     try: #예외처리
-        #         self.cur_state = next_state_table[self.cur_state][event]
-        #         # SLEEP에서 S키를 눌렀을 때 정의가 없어서 오류가 발생함.
-        #
-        #     except KeyError: #이 줄을 실행하려 했는데, 문제가 발생했고 그 문제가 KeyError였다면
-        #         # 아래 코드 실행 후 정상적으로 실행된다. 최소한 죽지는 않음.
-        #
-        #         # 어떤 상태에서? 어떤 이벤트 때문에 문제가 발생했는지??
-        #         print(f'ERROR: State {self.cur_state.__name__}    Event {event_name[event]}')
-        #     self.cur_state.enter(self, event)
+        if self.event_que:
+            event = self.event_que.pop()
+            self.cur_state.exit(self, event)
+            try: #예외처리
+                self.cur_state = next_state[self.cur_state][event]
+                # SLEEP에서 S키를 눌렀을 때 정의가 없어서 오류가 발생함.
+
+            except KeyError: #이 줄을 실행하려 했는데, 문제가 발생했고 그 문제가 KeyError였다면
+                # 아래 코드 실행 후 정상적으로 실행된다. 최소한 죽지는 않음.
+
+                # 어떤 상태에서? 어떤 이벤트 때문에 문제가 발생했는지??
+                print(f'ERROR: State {self.cur_state.__name__}    Event {event_name[event]}')
+            self.cur_state.enter(self, event)
 
 
 
@@ -159,9 +160,10 @@ class ATTACK:
 
 
 
-next_state_table = {
+next_state = {
     WalkingState: {RU: WalkingState, LU: WalkingState, RD: WalkingState, LD: WalkingState,
-                UPKEY_UP: WalkingState, UPKEY_DOWN: WalkingState, DOWNKEY_UP: WalkingState, DOWNKEY_DOWN: WalkingState},
+                    UPKEY_UP: WalkingState, UPKEY_DOWN: WalkingState, DOWNKEY_UP: WalkingState, DOWNKEY_DOWN: WalkingState,
+                     DD: WalkingState, DU: WalkingState},
     ATTACK: {DD: WalkingState, DU: WalkingState},
 }
 
@@ -171,10 +173,13 @@ class Boy:
     def __init__(self):
         # Boy is only once created, so instance image loading is fine
         self.image = load_image('SayBar_1.png')
-        self.font = load_font('ENCR10B.TTF', 16)
+        self.font = load_font('ENCR10B.TTF', 16) # x, y가 이동한 위치 나타내는 글씨 크기
         self.ATTACK = load_image('attack_d.png')
         self.dir = 1
+
         self.x_velocity, self.y_velocity = 0, 0
+        self.attack_velocity = 0
+
         self.frame = 0
         self.event_que = []
         self.cur_state = WalkingState
@@ -199,7 +204,7 @@ class Boy:
         if len(self.event_que) > 0:
             event = self.event_que.pop()
             self.cur_state.exit(self, event)
-            self.cur_state = next_state_table[self.cur_state][event]
+            self.cur_state = next_state[self.cur_state][event]
             self.cur_state.enter(self, event)
 
 
