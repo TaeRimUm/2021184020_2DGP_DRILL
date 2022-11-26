@@ -10,6 +10,7 @@ RUN_SPEED_KMPH = 40.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+ATTACK_SPPED_PPS = RUN_SPEED_PPS - 10
 
 # saybar Action Speed
 TIME_PER_ACTION = 0.5
@@ -22,7 +23,7 @@ FRAMES_PER_ACTION = 8
 
 
 # Boy Event
-RD, LD, RU, LU, DD, DU, UPKEY_DOWN, DOWNKEY_DOWN, UPKEY_UP, DOWNKEY_UP = range(10)
+RD, LD, RU, LU, DD, DU, RD_DD, LD_DD, RU_DU, LU_DU, UPKEY_DOWN, DOWNKEY_DOWN, UPKEY_UP, DOWNKEY_UP = range(14)
 event_name = {'RD', 'LD', 'RU', 'LU', 'DD', 'DU'}
 
 key_event_table = {
@@ -30,8 +31,13 @@ key_event_table = {
     (SDL_KEYDOWN, SDLK_LEFT): LD,
     (SDL_KEYUP, SDLK_RIGHT): RU,
     (SDL_KEYUP, SDLK_LEFT): LU,
+
     (SDL_KEYDOWN, SDLK_d): DD,
     (SDL_KEYUP, SDLK_d): DU,
+    # (SDL_KEYDOWN, SDLK_d, SDL_KEYDOWN, SDLK_RIGHT): RD_DD,
+    # (SDL_KEYDOWN, SDLK_d, SDL_KEYDOWN, SDLK_LEFT): LD_DD,
+    # (SDL_KEYUP, SDLK_d, SDL_KEYUP, SDLK_RIGHT): RU_DU,
+    # (SDL_KEYUP, SDLK_d, SDL_KEYUP, SDLK_LEFT): LU_DU,
 
     (SDL_KEYUP, SDLK_UP): UPKEY_UP,
     (SDL_KEYUP, SDLK_DOWN): DOWNKEY_UP,
@@ -45,15 +51,20 @@ key_event_table = {
 class WalkingState:
 
     def enter(self, event):
-
         if event == RD:
+            print('오른쪽키 누름')
             self.x_velocity += RUN_SPEED_PPS
         elif event == RU:
+            print('오른쪽키 땜')
             self.x_velocity -= RUN_SPEED_PPS
         if event == LD:
+            print('왼쪽키 누름')
             self.x_velocity -= RUN_SPEED_PPS
         elif event == LU:
+            print('왼쪽키 땜')
             self.x_velocity += RUN_SPEED_PPS
+
+
 
         if event == UPKEY_DOWN:
             self.y_velocity += RUN_SPEED_PPS
@@ -64,10 +75,20 @@ class WalkingState:
         elif event == DOWNKEY_UP:
             self.y_velocity += RUN_SPEED_PPS
 
+        if event == DD:
+            print('존나 때리기')
+            self.attack_velocity += 1
+        elif event == DU:
+            self.attack_velocity -= 1
 
+        # elif event == RD_DD or event == LD_DD:
+        #     print('이동키 누르고 공격할 때')
+        #     self.x_velocity += RUN_SPEED_PPS - 10
+        # elif event == RU_DU or event == LU_DU:
+        #     self.x_velocity += RUN_SPEED_PPS + 10
 
     def exit(self, event):
-        pass
+        print('나가기')
 
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
@@ -83,15 +104,21 @@ class WalkingState:
 
         self.font.draw(sx - 40, sy + 40, '(%d, %d)' % (self.x, self.y), (255, 255, 0))
 
-        if self.x_velocity > 0:                         #오른쪽으로 뛰기
+        if self.attack_velocity == 1:                   #D키 입력 받으면, 투명한 애니출력.
+            self.image.clip_draw(int(self.frame) * 100, 400, 100, 100, sx, sy)
+        elif self.attack_velocity == 1:
+            self.image.clip_draw(int(self.frame) * 100, 400, 100, 100, sx, sy)
+
+        elif self.x_velocity > 0:                         #오른쪽으로 뛰기
             self.image.clip_draw(int(self.frame) * 100, 100, 100, 100, sx, sy)
             self.dir = 1
         elif self.x_velocity < 0:                       #왼쪽으로 뛰기
             self.image.clip_draw(int(self.frame) * 100, 0, 100, 100, sx, sy)
             self.dir = -1
+
         else:
             # if boy x_velocity == 0
-            if self.y_velocity > 0 or self.y_velocity < 0:
+            if self.y_velocity > 0 or self.y_velocity < 0 :
                 if self.dir == 1:
                     self.image.clip_draw(int(self.frame) * 100, 100, 100, 100, sx, sy)
                 else:
@@ -103,35 +130,13 @@ class WalkingState:
                 else:                                           #왼쪽보고 대기
                     self.image.clip_draw(int(self.frame) * 100, 200, 100, 100, sx, sy)
 
-
-class ATTACK:
-    def enter(self, event):
-        if event == DD:
-            print('존나 때리기')
-            self.attack_velocity += 1
-        elif event == DU:
-            self.attack_velocity -= 1
-    def exit(self, event): #ATTACK이 끝날 때 마다 때리면 문제가 생김.
-        print('그만 때리기')
-
-    def do(self):
-        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-
-    def draw(self):
-        sx, sy = self.x - server.background.window_left, self.y - server.background.window_bottom
-
         if self.attack_velocity == 1 and self.dir == 1:
-            self.ATTACK.clip_draw(self.frame * 200, 100, 200, 100, sx, sy)
+            self.ATTACK.clip_draw(int(self.frame) * 200, 100, 200, 100, sx, sy)
 
         elif self.attack_velocity == 1 and self.dir == -1:
-            self.ATTACK.clip_draw(self.frame * 200, 0, 200, 100, sx, sy)
-
-        # if self.attack_dir == 1 and self.face_dir == 1:
-        #     self.ATTACK.clip_draw(self.frame * 200, 100, 200, 100, self.x, self.y)
-        #
-        # elif self.attack_dir == 1 and self.face_dir == -1:
-        #     self.ATTACK.clip_draw(self.frame * 200, 0, 200, 100, self.x, self.y)
-
+            self.ATTACK.clip_draw(int(self.frame) * 200, 0, 200, 100, sx, sy)
+        elif self.attack_velocity == -1:
+            print('그만 때리기')
 
     def handle_collision(self, other, group):
         pass #충돌 되어도, 아무 반응없기.
@@ -163,8 +168,7 @@ class ATTACK:
 next_state = {
     WalkingState: {RU: WalkingState, LU: WalkingState, RD: WalkingState, LD: WalkingState,
                     UPKEY_UP: WalkingState, UPKEY_DOWN: WalkingState, DOWNKEY_UP: WalkingState, DOWNKEY_DOWN: WalkingState,
-                     DD: WalkingState, DU: WalkingState},
-    ATTACK: {DD: WalkingState, DU: WalkingState},
+                     DD: WalkingState, DU: WalkingState}
 }
 
 
@@ -172,10 +176,11 @@ class Boy:
 
     def __init__(self):
         # Boy is only once created, so instance image loading is fine
+
         self.image = load_image('SayBar_1.png')
         self.font = load_font('ENCR10B.TTF', 16) # x, y가 이동한 위치 나타내는 글씨 크기
         self.ATTACK = load_image('attack_d.png')
-        self.dir = 1
+        self.dir = 0
 
         self.x_velocity, self.y_velocity = 0, 0
         self.attack_velocity = 0
