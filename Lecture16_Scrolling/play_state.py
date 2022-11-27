@@ -9,7 +9,6 @@ import game_world
 from saybar import Saybar
 # fill here
 from background import FixedBackground as Background
-
 import server
 
 
@@ -19,7 +18,6 @@ def enter():
 
     server.background = Background()
     game_world.add_object(server.background, 0)
-
 
 
 def exit():
