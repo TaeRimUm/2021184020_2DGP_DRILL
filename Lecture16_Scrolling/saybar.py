@@ -43,8 +43,6 @@ key_event_table = {
 
 class WalkingState:
 
-
-
     def enter(self, event):
         if event == RD:
             print('오른쪽키 누름')
