@@ -17,16 +17,13 @@ class FixedBackground:
                                        self.canvas_width, self.canvas_height,
                                        0, 0)
 
-
-
-
     def update(self):
         self.window_left = clamp(0,
-                                 int(server.boy.x) - self.canvas_width // 2,
+                                 int(server.saybar.x) - self.canvas_width // 2,
                                  self.w - self.canvas_width - 1)
 
         self.window_bottom = clamp(0,
-                                   int(server.boy.y) - self.canvas_height // 2,
+                                   int(server.saybar.y) - self.canvas_height // 2,
                                    self.h - self.canvas_height - 1)
 
     def handle_event(self, event):
@@ -72,8 +69,8 @@ class FixedBackground:
 #     def update(self):
 #
 #         # quadrant 3
-#         self.q3l = (int(server.boy.x) - self.canvas_width // 2) % self.w
-#         self.q3b = (int(server.boy.y) - self.canvas_height // 2) % self.h
+#         self.q3l = (int(server.saybar.x) - self.canvas_width // 2) % self.w
+#         self.q3b = (int(server.saybar.y) - self.canvas_height // 2) % self.h
 #         self.q3w = clamp(0, self.w - self.q3l, self.w)
 #         self.q3h = clamp(0, self.h - self.q3b, self.h)
 #
