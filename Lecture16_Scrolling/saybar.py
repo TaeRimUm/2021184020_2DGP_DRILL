@@ -4,6 +4,8 @@ from pico2d import *
 import game_world
 import server
 
+start = 0
+
 # Saybar Run Speed
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
 RUN_SPEED_KMPH = 40.0  # Km / Hour
@@ -41,6 +43,8 @@ key_event_table = {
 
 class WalkingState:
 
+
+
     def enter(self, event):
         if event == RD:
             print('오른쪽키 누름')
@@ -75,12 +79,20 @@ class WalkingState:
         print('나가기')
 
     def do(self):
+        global start
+
         self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.x += self.x_velocity * game_framework.frame_time
         self.y += self.y_velocity * game_framework.frame_time
 
         self.x = clamp(0, self.x, server.background.w - 1)
-        self.y = clamp(0, self.y, server.background.h - 1)
+        self.y = clamp(50, self.y, server.background.h - 1)
+
+        if start == 0: #1회용 함수임! 맨 처음 시작했을 때, 지정한 위치로 배치하기 위한 함수. 리스폰이라고 보면 됨.
+            self.x = clamp(25, 750, server.background.w - 1)
+            self.y = clamp(50, 50, server.background.h - 1)
+            start = 1 #start를 1로 해서, 다시 쓸일이 없도록 하기.
+            return 0
 
 
     def draw(self):
