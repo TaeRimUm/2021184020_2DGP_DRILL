@@ -5,11 +5,11 @@ import os
 from pico2d import *
 import game_framework
 import game_world
-
+import server
+import gamestop
 from saybar import Saybar
 from Enemy import Skul
 from background import FixedBackground as Background
-import server
 
 
 def enter():
@@ -50,10 +50,9 @@ def handle_events():
         else:
             server.saybar.handle_event(event)
 
-        # if (event.type, event.key) == (SDL_KEYDOWN, SDLK_q):
-        #     game_framework.push_state(gamestop)
-        #                  # ㄴ> push -> change
-        #이건 일시정지 추가할 때.
+        if (event.type, event.key) == (SDL_KEYDOWN, SDLK_q):
+            game_framework.push_state(gamestop)
+                         # ㄴ> push -> change
 
 
 
