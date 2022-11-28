@@ -1,4 +1,6 @@
 import random
+
+import game_framework
 import server
 from pico2d import *
 import game_world
@@ -21,7 +23,6 @@ class Skul:
     image = None
 
     def do(self):
-        # self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.x = clamp(0, self.x, 1600)
 
     def __init__(self):
@@ -37,7 +38,9 @@ class Skul:
         sx, sy = self.x - server.background.window_left, self.y - server.background.window_bottom
         self.font.draw(sx - 40, sy + 40, '(%d, %d)' % (self.x, self.y), (25, 25, 0))
 
-        self.image.clip_draw(self.frame * 100, 200, 100, 100, sx, sy)
+        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+        self.image.clip_draw(int(self.frame) * 100, 200, 100, 100, sx, sy)
+
         #draw_rectangle(*self.get_bb())  # pico2d 가 제공하는 사각형 그리는거
         #이건 야매 방법인데, sx랑 sy를 어케든 만지면 (충돌박스 + 해골이미지) 같이 움직이게 할 수 있는데,
         #시간은 없고, 유혹을 견디지 못하고... 야매로 해결해 버렸다.....
