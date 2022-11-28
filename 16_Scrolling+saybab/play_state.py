@@ -7,18 +7,27 @@ import game_framework
 import game_world
 
 from saybar import Saybar
-# fill here
+from Enemy import Skul
 from background import FixedBackground as Background
 import server
 
 
 def enter():
+    global saybar
     server.saybar = Saybar()
-    game_world.add_object(server.saybar, 1)
+    game_world.add_object(server.saybar, 2)
 
     server.background = Background()
     game_world.add_object(server.background, 0)
 
+    global Enemy
+    server.Enemy = Skul()
+    Enemy = [Skul() for i in range(10)]
+    game_world.add_objects(Enemy, 1)
+
+    # 충돌 대상 정보 등록
+    game_world.add_collision_pairs(server.saybar, Enemy, 'Saybar:Skul')
+    # 'Saybar:Skul' 이란 그룹의 이름으로 Saybar와 Skul의 충돌하겠다라는걸 저장함.
 
 def exit():
     game_world.clear()
@@ -41,6 +50,11 @@ def handle_events():
         else:
             server.saybar.handle_event(event)
 
+        # if (event.type, event.key) == (SDL_KEYDOWN, SDLK_q):
+        #     game_framework.push_state(gamestop)
+        #                  # ㄴ> push -> change
+        #이건 일시정지 추가할 때.
+
 
 
 def collide(a, b):
@@ -61,17 +75,33 @@ def update():
         game_object.update()
 
     for a, b, group in game_world.all_collision_pairs():
-        if collide(a, b):            
+        if collide(a, b):
+            print('충돌', group)
             a.handle_collision(b, group)
             b.handle_collision(a, group)
 
+def draw_world():
+    for game_object in game_world.all_objects():
+        game_object.draw()
 
 
 def draw():
     clear_canvas()
+    draw_world()
     for game_object in game_world.all_objects():
         game_object.draw()
     update_canvas()
+
+def test_self():
+    import play_state
+
+    pico2d.open_canvas()
+    game_framework.run(play_state)
+    pico2d.clear_canvas()
+
+if __name__ == '__main__':
+    test_self()
+# 이건 뭐징 일단 넣고봄.
 
 
 
