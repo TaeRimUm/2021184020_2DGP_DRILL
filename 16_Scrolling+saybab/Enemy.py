@@ -1,43 +1,47 @@
 import random
-#import schedule
-#pip install schedule
-import time
-#pip install pandas , pip install pillow
+import server
 from pico2d import *
 import game_world
+
+
+# Skul Run Speed
+PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
+RUN_SPEED_KMPH = 40.0  # Km / Hour
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
+# Skul Action Speed
+TIME_PER_ACTION = 0.5
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+FRAMES_PER_ACTION = 8
 
 class Skul:
     frame = 0
     image = None
+
     def do(self):
-        self.frame = (self.frame + 1) % 8
+        # self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
         self.x = clamp(0, self.x, 1600)
 
-    def __init__(self): ##이건 메소드(초기화)인데, 이걸 어떻게 반복하지???##
+    def __init__(self):
         print('Skul에 있는 메소드 실행(해골 소환)')
-        # if Ball.image == None:
-        #     Ball.image = load_image('Enemy_Skul_1.png')
-        ## 어 이거 Boy클레스에  만들어도 제대로 돌아가네? 같은 __init__라 그른가!
+        self.font = load_font('ENCR10B.TTF', 16) # x, y가 이동한 위치 나타내는 글씨 크기
+        if Skul.image == None:
+            Skul.image = load_image('Enemy_Skul_1.png')
 
-        self.x, self.y, self.fall_speed = random.randint(0, 1600), 80, 0
-
+        self.x, self.y, self.fall_speed = random.randint(50, 1600), 50, 0
 
 
     def draw(self):
-        #t = [200, 300]
-        self.frame = (self.frame + 1) % 8
-        #self.x = clamp(0, self.x, 1600)
-        #self.image.draw(self.x, self.y) # 일단 200으로 넣자. #
-        self.image.clip_draw(self.frame * 100, 200, 100, 100, self.x, self.y)
+        sx, sy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        self.font.draw(sx - 40, sy + 40, '(%d, %d)' % (self.x, self.y), (25, 25, 0))
 
-        draw_rectangle(*self.get_bb())  # pico2d 가 제공하는 사각형 그리는거
-
-
-        #self.image.clip_draw(self.frame * 100, (random.choice(t)), 100, 100, self.x, self.y)
-                                                    # ㄴ> 이거 넣으면 도리도리 존내함. 200이랑 300 중 하나를 뽑아오는건 맞는데,
-                                                    # ㄴ> def draw 전체가 계속 돌아가는거라 도리도리하는 거일 듯.
-                                                    # ㄴ> 이거 한번만 돌아가게 하고 싶은데, 이건 교수님께 여쭤보자. 방법을 모르겠다.
-
+        self.image.clip_draw(self.frame * 100, 200, 100, 100, sx, sy)
+        #draw_rectangle(*self.get_bb())  # pico2d 가 제공하는 사각형 그리는거
+        #이건 야매 방법인데, sx랑 sy를 어케든 만지면 (충돌박스 + 해골이미지) 같이 움직이게 할 수 있는데,
+        #시간은 없고, 유혹을 견디지 못하고... 야매로 해결해 버렸다.....
+        # 방법은 그냥 충돌박스를 지워버리기. # 원래는 그냥 충돌박스도 같이 따라다니는데, 지워버림 ㅇㅇ #
 
 
 
