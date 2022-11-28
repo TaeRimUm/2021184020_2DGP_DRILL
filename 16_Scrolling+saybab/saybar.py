@@ -103,6 +103,7 @@ class WalkingState:
         elif self.attack_velocity == 1:
             self.image.clip_draw(int(self.frame) * 100, 400, 100, 100, sx, sy)
 
+
         elif self.x_velocity > 0:                         #오른쪽으로 뛰기
             self.image.clip_draw(int(self.frame) * 100, 100, 100, 100, sx, sy)
             self.dir = 1
